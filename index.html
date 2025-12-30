@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora de Conversión Dólar - Bfs</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #1e3c72, #2a5298);
+            color: #333;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        .container {
+            background-color: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            width: 100%;
+            max-width: 800px;
+            overflow: hidden;
+        }
+        
+        header {
+            background: linear-gradient(to right, #0f4c75, #3282b8);
+            color: white;
+            padding: 25px;
+            text-align: center;
+        }
+        
+        h1 {
+            font-size: 2.2rem;
+            margin-bottom: 8px;
+        }
+        
+        .subtitle {
+            font-size: 1rem;
+            opacity: 0.9;
+        }
+        
+        .calculator {
+            padding: 30px;
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 25px;
+        }
+        
+        @media (min-width: 768px) {
+            .calculator {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+        
+        .section {
+            background-color: #f8f9fa;
+            border-radius: 10px;
+            padding: 25px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+            border: 1px solid #eaeaea;
+        }
+        
+        .section-title {
+            font-size: 1.4rem;
+            color: #0f4c75;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #3282b8;
+        }
+        
+        .input-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #555;
+        }
+        
+        input, select {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 1rem;
+            transition: border 0.3s, box-shadow 0.3s;
+        }
+        
+        input:focus, select:focus {
+            outline: none;
+            border-color: #3282b8;
+            box-shadow: 0 0 0 3px rgba(50, 130, 184, 0.2);
+        }
+        
+        .rate-value {
+            font-size: 1.1rem;
+            padding: 12px;
+            background-color: #e9f5fe;
+            border-radius: 6px;
+            text-align: center;
+            font-weight: 600;
+            color: #0f4c75;
+            border: 1px dashed #3282b8;
+        }
+        
+        .result {
+            font-size: 1.3rem;
+            padding: 15px;
+            background-color: #e9f5fe;
+            border-radius: 6px;
+            text-align: center;
+            font-weight: 700;
+            color: #0a3d62;
+            margin-top: 10px;
+            border: 2px solid #3282b8;
+            min-height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .buttons {
+            display: flex;
+            gap: 15px;
+            margin-top: 25px;
+        }
+        
+        button {
+            flex: 1;
+            padding: 14px;
+            border: none;
+            border-radius: 6px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .convert-btn {
+            background-color: #3282b8;
+            color: white;
+        }
+        
+        .convert-btn:hover {
+            background-color: #0f4c75;
+            transform: translateY(-2px);
+        }
+        
+        .reset-btn {
+            background-color: #f1f1f1;
+            color: #333;
+        }
+        
+        .reset-btn:hover {
+            background-color: #ddd;
+            transform: translateY(-2px);
+        }
+        
+        .info-box {
+            grid-column: 1 / -1;
+            background-color: #f0f8ff;
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 10px;
+            border-left: 5px solid #3282b8;
+        }
+        
+        .info-title {
+            font-weight: 700;
+            color: #0f4c75;
+            margin-bottom: 10px;
+        }
+        
+        .info-text {
+            color: #555;
+            line-height: 1.5;
+        }
+        
+        .highlight {
+            color: #0f4c75;
+            font-weight: 600;
+        }
+        
+        .conversion-arrow {
+            text-align: center;
+            font-size: 2rem;
+            color: #3282b8;
+            display: none;
+        }
+        
+        @media (min-width: 768px) {
+            .conversion-arrow {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+        }
+        
+        footer {
+            text-align: center;
+            padding: 20px;
+            color: #777;
+            font-size: 0.9rem;
+            border-top: 1px solid #eee;
+            background-color: #f8f9fa;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Calculadora de Divisas</h1>
+            <p class="subtitle">Conversión entre Dólares (USD) y Bfs con tasas de cambio personalizables</p>
+        </header>
+        
+        <div class="calculator">
+            <div class="section">
+                <h2 class="section-title">Tasas de Cambio</h2>
+                
+                <div class="input-group">
+                    <label for="dollar-rate">Precio del Dólar (USD → Bfs)</label>
+                    <input type="number" id="dollar-rate" step="0.01" min="0.01" value="35.50">
+                </div>
+                
+                <div class="input-group">
+                    <label for="bcv-rate">Tasa BCV (Bfs → USD)</label>
+                    <input type="number" id="bcv-rate" step="0.01" min="0.01" value="36.20">
+                </div>
+                
+                <div class="info-box">
+                    <div class="info-title">Instrucciones:</div>
+                    <div class="info-text">
+                        <p>1. Establece las tasas de cambio en la sección izquierda.</p>
+                        <p>2. Selecciona el tipo de conversión: <span class="highlight">Dólar a Bfs</span> o <span class="highlight">Bfs a Dólar</span>.</p>
+                        <p>3. Introduce el monto a convertir.</p>
+                        <p>4. Haz clic en "Convertir" para ver los resultados.</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="conversion-arrow">⇄</div>
+            
+            <div class="section">
+                <h2 class="section-title">Conversión</h2>
+                
+                <div class="input-group">
+                    <label for="conversion-type">Tipo de Conversión</label>
+                    <select id="conversion-type">
+                        <option value="usd-to-bfs">Dólar (USD) → Bfs</option>
+                        <option value="bfs-to-usd">Bfs → Dólar (USD)</option>
+                    </select>
+                </div>
+                
+                <div class="input-group">
+                    <label for="amount">Monto a Convertir</label>
+                    <input type="number" id="amount" step="0.01" min="0.01" value="100.00">
+                </div>
+                
+                <div class="input-group">
+                    <label>Resultado con Precio del Dólar</label>
+                    <div class="result" id="result-dollar-rate">0.00</div>
+                </div>
+                
+                <div class="input-group">
+                    <label>Resultado con Tasa BCV</label>
+                    <div class="result" id="result-bcv-rate">0.00</div>
+                </div>
+                
+                <div class="buttons">
+                    <button class="convert-btn" id="convert-btn">Convertir</button>
+                    <button class="reset-btn" id="reset-btn">Restablecer</button>
+                </div>
+            </div>
+        </div>
+        
+        <div class="info-box">
+            <div class="info-title">Cómo funciona:</div>
+            <div class="info-text">
+                <p><span class="highlight">Conversión Dólar → Bfs:</span> Se multiplica el monto en dólares por el "Precio del Dólar" para obtener Bfs.</p>
+                <p><span class="highlight">Conversión Bfs → Dólar:</span> Se divide el monto en Bfs entre el "Precio del Dólar" para obtener dólares.</p>
+                <p><span class="highlight">Tasa BCV:</span> En ambas conversiones, también se aplica la tasa BCV para comparar resultados.</p>
+            </div>
+        </div>
+        
+        <footer>
+            <p>Calculadora de divisas - Precio del Dólar: <span id="current-dollar-rate">35.50</span> | Tasa BCV: <span id="current-bcv-rate">36.20</span></p>
+            <p>Los valores mostrados son referenciales y pueden ser modificados.</p>
+        </footer>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Elementos del DOM
+            const dollarRateInput = document.getElementById('dollar-rate');
+            const bcvRateInput = document.getElementById('bcv-rate');
+            const conversionTypeSelect = document.getElementById('conversion-type');
+            const amountInput = document.getElementById('amount');
+            const resultDollarRate = document.getElementById('result-dollar-rate');
+            const resultBcvRate = document.getElementById('result-bcv-rate');
+            const convertBtn = document.getElementById('convert-btn');
+            const resetBtn = document.getElementById('reset-btn');
+            const currentDollarRateSpan = document.getElementById('current-dollar-rate');
+            const currentBcvRateSpan = document.getElementById('current-bcv-rate');
+            
+            // Función para formatear números con separadores de miles
+            function formatNumber(number) {
+                return new Intl.NumberFormat('es-VE', {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2
+                }).format(number);
+            }
+            
+            // Función para realizar la conversión
+            function convertCurrency() {
+                // Obtener valores de entrada
+                const dollarRate = parseFloat(dollarRateInput.value);
+                const bcvRate = parseFloat(bcvRateInput.value);
+                const amount = parseFloat(amountInput.value);
+                const conversionType = conversionTypeSelect.value;
+                
+                // Validar entradas
+                if (isNaN(dollarRate) || dollarRate <= 0) {
+                    alert("Por favor ingresa un valor válido para el Precio del Dólar");
+                    return;
+                }
+                
+                if (isNaN(bcvRate) || bcvRate <= 0) {
+                    alert("Por favor ingresa un valor válido para la Tasa BCV");
+                    return;
+                }
+                
+                if (isNaN(amount) || amount <= 0) {
+                    alert("Por favor ingresa un monto válido para convertir");
+                    return;
+                }
+                
+                // Realizar conversiones según el tipo seleccionado
+                let resultWithDollarRate, resultWithBcvRate;
+                
+                if (conversionType === 'usd-to-bfs') {
+                    // Dólar a Bfs: multiplicar por el precio del dólar
+                    resultWithDollarRate = amount * dollarRate;
+                    // También multiplicar por la tasa BCV para comparación
+                    resultWithBcvRate = amount * bcvRate;
+                    
+                    resultDollarRate.textContent = `${formatNumber(resultWithDollarRate)} Bfs`;
+                    resultBcvRate.textContent = `${formatNumber(resultWithBcvRate)} Bfs`;
+                } else {
+                    // Bfs a Dólar: dividir entre el precio del dólar
+                    resultWithDollarRate = amount / dollarRate;
+                    // También dividir entre la tasa BCV para comparación
+                    resultWithBcvRate = amount / bcvRate;
+                    
+                    resultDollarRate.textContent = `$${formatNumber(resultWithDollarRate)} USD`;
+                    resultBcvRate.textContent = `$${formatNumber(resultWithBcvRate)} USD`;
+                }
+                
+                // Actualizar los valores en el pie de página
+                currentDollarRateSpan.textContent = dollarRate;
+                currentBcvRateSpan.textContent = bcvRate;
+            }
+            
+            // Función para restablecer valores
+            function resetValues() {
+                dollarRateInput.value = "35.50";
+                bcvRateInput.value = "36.20";
+                amountInput.value = "100.00";
+                conversionTypeSelect.value = "usd-to-bfs";
+                resultDollarRate.textContent = "0.00";
+                resultBcvRate.textContent = "0.00";
+                currentDollarRateSpan.textContent = "35.50";
+                currentBcvRateSpan.textContent = "36.20";
+            }
+            
+            // Event listeners
+            convertBtn.addEventListener('click', convertCurrency);
+            resetBtn.addEventListener('click', resetValues);
+            
+            // Convertir automáticamente cuando cambie cualquier valor
+            dollarRateInput.addEventListener('input', convertCurrency);
+            bcvRateInput.addEventListener('input', convertCurrency);
+            amountInput.addEventListener('input', convertCurrency);
+            conversionTypeSelect.addEventListener('change', convertCurrency);
+            
+            // Convertir al cargar la página
+            convertCurrency();
+        });
+    </script>
+</body>
+</html>
